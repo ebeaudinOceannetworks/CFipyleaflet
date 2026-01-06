@@ -62,8 +62,8 @@ def parse_cor_header(filepath):
             elif line.startswith("Citation"):
                 info["citation"] = line.replace("Citation:", "").strip()
 
-    info['lat'] = float(np.mean(info['lat']))
-    info['lon'] = float(np.mean(info['lon']))
+    info["lat"] = float(np.nanmean(info["lat"])) ###non-nans only considered
+    info["lon"] = float(np.nanmean(info["lon"]))
 
     return info
 

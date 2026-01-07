@@ -7,6 +7,7 @@ from glob import glob
 import re
 from datetime import datetime
 import numpy as np
+import pandas as pd
 
 def parse_cor_header(filepath):
     """Parse metadata from a .cor file."""
@@ -89,7 +90,7 @@ def extract_community_from_citation(citation):
     # Organizations we never want to treat as "community"
     EXCLUDE = { ONC, "Fisheries and Oceans Canada",}
 
-    ###FORCE is a mistake
+    ###FORCE is an attribution mistake
     PRIORITY_COMMUNITIES = {
         "Nunatsiavut Government",
     }
@@ -114,7 +115,6 @@ def extract_community_from_citation(citation):
 
     return community_orgs
 
-
 def parse_cor_folder(folder, limit=None):
     """Parse all .cor files in a folder and return list of metadata dicts."""
     cor_files = glob(os.path.join(folder, "*.cor"))
@@ -127,4 +127,39 @@ def parse_cor_folder(folder, limit=None):
         info['community'] = extract_community_from_citation(info['citation'])
         infos.append(info)
     return infos
+
+
+def read_cor_data(filepath):
+    """
+    Reads a .cor file and returns a DataFrame with all measurements.
+    """
+    data_started = False
+    data_lines = []
+    with open(filepath, 'r', errors='ignore') as f:
+        for line in f:
+            line = line.strip()
+            if line.startswith("------ BEGIN DATA ------"):
+                data_started = True
+                continue
+            if line.startswith("------ END DATA ------"):
+                data_started = False
+                break
+            if data_started:
+                data_lines.append(line)
     
+    if not data_lines:
+        return pd.DataFrame()
+
+    # Example columns (customize based on your cor files)
+    columns = ["Time", "Conductivity", "Density", "Depth", "PracticalSalinity",
+               "Turbidity", "Pressure", "SoundSpeed", "Temperature",
+               "OxygenSaturation", "Chlorophyll", "CDOM", "Latitude", "Longitude"]
+
+    df = pd.DataFrame([line.split(",") for line in data_lines], columns=columns)
+    numeric_cols = columns[1:-2]
+    df[numeric_cols] = df[numeric_cols].astype(float)
+    df["Time"] = pd.to_datetime(df["Time"])
+    df["Latitude"] = df["Latitude"].astype(float)
+    df["Longitude"] = df["Longitude"].astype(float)
+    
+    return df

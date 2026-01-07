@@ -14,9 +14,11 @@ class StationMetadata:
         self.station_infos = station_infos
 
         self.station_codes = [s["stationCode"] for s in station_infos]
+        self.alias = [s["stationAlias"] for s in station_infos]
         self.lats = np.array([s["lat"] for s in station_infos])
         self.lons = np.array([s["lon"] for s in station_infos])
         self.communities = [s["community"] for s in station_infos]
+        self.source_files = [s["source_file"] for s in station_infos]
 
         # Optional
         self.deployment_times = {

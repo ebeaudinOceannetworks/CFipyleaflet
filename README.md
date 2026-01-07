@@ -12,3 +12,5 @@ app.py - main script (like a rug that ties the room together), imports modules, 
 1. some .cor files have lat/lon NaN
 2. some citations have multiple Communities (e.g. FORCE+Nunatsiavut+PSF) (what is FORCE?)
 3. Frobisher bay stations have citations of ONC only
+4. there are a lot of ONC citations around Nunatsiavut also
+5. remove test harbor stations (GVHA5)

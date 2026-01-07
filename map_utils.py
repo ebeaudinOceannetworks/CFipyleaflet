@@ -2,8 +2,8 @@
 
 import ipyleaflet
 
-default_blue = "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png"
-selected_green = "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png"
+DEFAULT_ICON = ipyleaflet.Icon(icon_url="https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png")
+SELECTED_ICON = ipyleaflet.Icon(icon_url="https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png")
 
 def create_base_map(center=(56, -96), zoom=3):
     """
@@ -24,19 +24,37 @@ def create_marker(lat, lon, code, click_handler=None):
     	title=code,
     	draggable=False,
     	rise_on_hover=True,
-        rise_offset=200,)
+        rise_offset=200,
+        icon=DEFAULT_ICON)
     if click_handler:
         marker.on_click(click_handler)
     return marker
 
-def make_click_handler(selected_stations, marker_dict, code):
+from ipyleaflet import Icon
+
+#default_blue = "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png"
+#selected_green = "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png"
+
+### Not used anymore
+def make_click_handler(code, alias, map_state, info):
     def handle_click(**kwargs):
-        if code in selected_stations:
-            selected_stations.remove(code)
-            marker_dict[code].icon = ipyleaflet.Icon(icon_url=default_blue)
+        marker = map_state["marker_dict"][code]
+
+        if code in map_state["selected_stations"]:
+            # ---- unselect ----
+            map_state["selected_stations"].remove(code)
+            marker.icon = Icon(icon_url=default_blue)
         else:
-            selected_stations.append(code)
-            marker_dict[code].icon = ipyleaflet.Icon(icon_url=selected_green)
+            # ---- select ----
+            map_state["selected_stations"].append(code)
+            marker.icon = Icon(icon_url=selected_green)
+
+        # Update HTML info box
+        info.value = "<b>Selected stations:</b> " + (
+        	", ".join(map_state["selected_stations"])
+        	if map_state["selected_stations"] else "none"
+        	)
+
     return handle_click
 
 def draw_transect(map_obj, coords):
